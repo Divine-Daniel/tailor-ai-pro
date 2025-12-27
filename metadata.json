@@ -1,0 +1,8 @@
+{
+  "name": "TailorAI - AI-Powered Body Measurements",
+  "description": "A high-end SaaS platform for tailors and fashion designers to generate accurate body measurements from photos using advanced AI reconstruction.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}

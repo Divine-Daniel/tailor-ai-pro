@@ -2,25 +2,19 @@
 import { GoogleGenAI, Type, Modality } from "@google/genai";
 
 /**
- * Initialize AI client with safety check.
- * The API_KEY must be configured in Vercel environment variables.
- * For local development, ensure it's in your .env or similar context.
+ * Initialize AI client using the exclusive process.env.API_KEY.
  */
 const getAI = () => {
-  // Use the API key provided by the user in their prompt context
-  // or the environment variable injected by Vercel.
-  const apiKey = process.env.API_KEY || 'AIzaSyCbP8cLEDKMbsy-KNkKC9jIFWnsjWvqYug';
+  const apiKey = process.env.API_KEY;
   
   if (!apiKey) {
-    console.error("CRITICAL: API_KEY is missing. Add it to Vercel Environment Variables.");
+    console.error("CRITICAL: API_KEY is missing. Ensure the environment variable is configured.");
     throw new Error("Neural link failed: Missing API_KEY.");
   }
   return new GoogleGenAI({ apiKey });
 };
 
-/**
- * Enhanced style advice using Gemini 3 Pro with Thinking Mode
- */
+// Analyze measurements and provide style advice using Gemini 3 Pro.
 export const generateStyleAdvice = async (measurements: string) => {
   try {
     const ai = getAI();
@@ -29,21 +23,18 @@ export const generateStyleAdvice = async (measurements: string) => {
       contents: `Analyze these body measurements: ${measurements}. 
       Provide a high-end fashion consultation. Focus on structural silhouettes and fabric weight.`,
       config: {
-        thinkingConfig: { thinkingBudget: 24576 },
+        thinkingConfig: { thinkingBudget: 32768 }, // max budget for gemini-3-pro-preview
         temperature: 0.7,
       }
     });
-    
     return response.text || "Neural analysis complete but returned empty.";
   } catch (error) {
     console.error("Gemini API Error:", error);
-    return "The neural link is currently unstable. Please verify your API_KEY in Vercel.";
+    return "The neural link is currently unstable. Please verify your connection.";
   }
 };
 
-/**
- * Image Generation using Gemini 3 Pro Image Preview
- */
+// Generate high-resolution fashion imagery using Gemini 3 Pro Image.
 export const generateFashionImage = async (prompt: string, size: "1K" | "2K" | "4K") => {
   try {
     const ai = getAI();
@@ -60,7 +51,8 @@ export const generateFashionImage = async (prompt: string, size: "1K" | "2K" | "
 
     for (const part of response.candidates[0].content.parts) {
       if (part.inlineData) {
-        return `data:image/png;base64,${part.inlineData.data}`;
+        const base64EncodeString: string = part.inlineData.data;
+        return `data:image/png;base64,${base64EncodeString}`;
       }
     }
   } catch (error) {
@@ -69,9 +61,7 @@ export const generateFashionImage = async (prompt: string, size: "1K" | "2K" | "
   return null;
 };
 
-/**
- * Video Generation using Veo 3.1
- */
+// Generate cinematic fashion videos using Veo 3.1.
 export const generateFashionVideo = async (prompt: string, aspectRatio: '16:9' | '9:16') => {
   try {
     const ai = getAI();
@@ -91,17 +81,15 @@ export const generateFashionVideo = async (prompt: string, aspectRatio: '16:9' |
     }
 
     const downloadLink = operation.response?.generatedVideos?.[0]?.video?.uri;
-    const apiKey = process.env.API_KEY || 'AIzaSyCbP8cLEDKMbsy-KNkKC9jIFWnsjWvqYug';
-    return `${downloadLink}&key=${apiKey}`;
+    // The response.body contains the MP4 bytes. You must append an API key when fetching from the download link.
+    return `${downloadLink}&key=${process.env.API_KEY}`;
   } catch (error) {
     console.error("Video Gen Error:", error);
     return null;
   }
 };
 
-/**
- * Deep Image/Video Analysis using Gemini 3 Pro Preview
- */
+// Perform deep visual analysis on provided image data using Gemini 3 Pro.
 export const analyzeVisualData = async (fileBase64: string, mimeType: string, query: string) => {
   try {
     const ai = getAI();
@@ -114,10 +102,9 @@ export const analyzeVisualData = async (fileBase64: string, mimeType: string, qu
         ] 
       },
       config: {
-        thinkingConfig: { thinkingBudget: 24576 }
+        thinkingConfig: { thinkingBudget: 32768 } // max budget for gemini-3-pro-preview
       }
     });
-
     return response.text;
   } catch (error) {
     return "Analysis node timeout. Verify connection.";

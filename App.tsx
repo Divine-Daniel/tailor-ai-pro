@@ -1,14 +1,25 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import LandingPage from './pages/LandingPage';
 import Dashboard from './pages/Dashboard';
 import Snowfall from './components/Snowfall';
 import { UserRole } from './types';
-import { Key, Shield, User, Scissors, Users, Plus, ShieldCheck } from 'lucide-react';
+import { Key, Shield, User, Scissors, Users, Plus, ShieldCheck, Sun, Moon } from 'lucide-react';
 
 const App: React.FC = () => {
   const [role, setRole] = useState<UserRole | null>(null);
   const [showRoleSelector, setShowRoleSelector] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDarkMode]);
+
+  const toggleTheme = () => setIsDarkMode(!isDarkMode);
 
   const handleLogout = () => {
     setRole(null);
@@ -19,7 +30,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen relative">
+    <div className={`min-h-screen relative transition-colors duration-500 ${isDarkMode ? 'bg-slate-950' : 'bg-slate-50'}`}>
       <Snowfall />
       
       {role ? (
@@ -27,40 +38,46 @@ const App: React.FC = () => {
       ) : (
         <div className="relative overflow-x-hidden">
           {/* Navigation Bar */}
-          <nav className="fixed top-0 left-0 right-0 z-40 px-8 py-6 flex justify-between items-center bg-slate-950/60 backdrop-blur-2xl border-b border-white/5">
+          <nav className={`fixed top-0 left-0 right-0 z-40 px-8 py-6 flex justify-between items-center transition-all duration-500 border-b ${isDarkMode ? 'bg-slate-950/60 backdrop-blur-2xl border-white/5' : 'bg-white/80 backdrop-blur-2xl border-slate-200 shadow-sm'}`}>
             <div className="flex items-center space-x-3 group cursor-pointer" onClick={() => setShowRoleSelector(false)}>
               <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(37,99,235,0.4)]">
                  <Scissors className="w-6 h-6 text-white" />
               </div>
-              <h1 className="text-2xl font-bold tracking-tighter text-white">
+              <h1 className={`text-2xl font-bold tracking-tighter ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
                 TailorAI
               </h1>
             </div>
             
-            <div className="hidden md:flex items-center space-x-10 text-sm font-semibold text-slate-400">
-              <span className="hover:text-white cursor-pointer transition-colors">Features</span>
-              <span className="hover:text-white cursor-pointer transition-colors">How it works</span>
-              <span className="hover:text-white cursor-pointer transition-colors">Enterprise</span>
-              <span className="hover:text-white cursor-pointer transition-colors">Pricing</span>
+            <div className={`hidden md:flex items-center space-x-10 text-sm font-semibold ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+              <span className="hover:text-blue-500 cursor-pointer transition-colors">Features</span>
+              <span className="hover:text-blue-500 cursor-pointer transition-colors">How it works</span>
+              <span className="hover:text-blue-500 cursor-pointer transition-colors">Enterprise</span>
+              <span className="hover:text-blue-500 cursor-pointer transition-colors">Pricing</span>
             </div>
 
             <div className="flex items-center space-x-5">
               <button 
+                onClick={toggleTheme}
+                className={`p-3 rounded-xl transition-all ${isDarkMode ? 'bg-slate-900 text-yellow-400 hover:bg-slate-800' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+              >
+                {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              </button>
+              <button 
                 onClick={() => setShowRoleSelector(true)}
-                className="text-white font-bold text-sm hover:text-blue-400 transition-colors"
+                className={`font-bold text-sm transition-colors ${isDarkMode ? 'text-white hover:text-blue-400' : 'text-slate-700 hover:text-blue-600'}`}
               >
                 Log In
               </button>
               <button 
                 onClick={handleGetStarted}
-                className="px-6 py-3 rounded-xl bg-white text-black font-bold text-sm hover:bg-slate-200 transition-all shadow-xl shadow-white/5"
+                className={`px-8 py-3 rounded-2xl font-bold text-sm transition-all shadow-xl active:scale-95 ${isDarkMode ? 'bg-white text-black hover:bg-slate-200' : 'bg-blue-600 text-white hover:bg-blue-500'}`}
               >
                 Get Started
               </button>
             </div>
           </nav>
 
-          <LandingPage onGetStarted={handleGetStarted} />
+          <LandingPage onGetStarted={handleGetStarted} isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
 
           {/* Role Selection Modal */}
           {showRoleSelector && (

@@ -1,86 +1,228 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect, useRef } from 'react';
 import { 
-  CheckCircle2, ChevronRight, Play, Upload, BarChart, 
-  Box, Scissors, FileDown, ShieldCheck, Mail, Info, 
-  Plus, Minus, Star, ArrowRight, UserCheck, Zap, Repeat,
+  ChevronRight, Play, Box, Scissors, Plus, Star, ArrowRight,
   Ruler, Users, Lightbulb, FileText, Hammer, Lock, Shield, 
   Clock, Award, Layout, BookOpen, Database, X, Sparkles,
-  Camera, Globe, Cpu, Smartphone, Check, HelpCircle
+  Camera, Globe, Cpu, Smartphone, Check, HelpCircle,
+  AlertCircle, Target, Shirt, ShoppingBag, Layers,
+  Activity, Thermometer, Briefcase, Sun, Moon, Instagram,
+  Twitter, Linkedin, Github, Mail, Facebook, ChevronLeft
 } from 'lucide-react';
 
 interface LandingPageProps {
   onGetStarted: () => void;
+  isDarkMode: boolean;
+  toggleTheme: () => void;
 }
 
-const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
-  const [isFeatureModalOpen, setIsFeatureModalOpen] = useState(false);
+const Skeleton = ({ className }: { className?: string }) => (
+  <div className={`animate-pulse bg-slate-800/40 rounded-3xl ${className}`} />
+);
+
+const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, isDarkMode, toggleTheme }) => {
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  
+  const heroSlides = [
+    {
+      img: "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?auto=format&fit=crop&q=80&w=2400",
+      title: "THE FUTURE OF BESPOKE FIT.",
+      subtitle: "Precision Neural Reconstruction Engine v2.0"
+    },
+    {
+      img: "https://images.unsplash.com/photo-1594932224828-b4b059b6f6f9?auto=format&fit=crop&q=80&w=2400",
+      title: "CRAFTED BY DATA.",
+      subtitle: "Sub-millimeter Anatomical Accuracy"
+    },
+    {
+      img: "https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&q=80&w=2400",
+      title: "MASTER YOUR ATELIER.",
+      subtitle: "Digital Workflow for Modern Artisans"
+    }
+  ];
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsInitialLoad(false), 1200);
+    const slideTimer = setInterval(() => {
+      setCurrentSlide(prev => (prev + 1) % heroSlides.length);
+    }, 6000);
+
+    // Neural Background Animation Logic
+    const canvas = document.getElementById('neural-canvas') as HTMLCanvasElement;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let particles: { x: number; y: number; vx: number; vy: number }[] = [];
+    const particleCount = 80;
+
+    const init = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      particles = [];
+      for (let i = 0; i < particleCount; i++) {
+        particles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          vx: (Math.random() - 0.5) * 0.5,
+          vy: (Math.random() - 0.5) * 0.5
+        });
+      }
+    };
+
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = isDarkMode ? 'rgba(59, 130, 246, 0.4)' : 'rgba(37, 99, 235, 0.2)';
+      ctx.strokeStyle = isDarkMode ? 'rgba(59, 130, 246, 0.1)' : 'rgba(37, 99, 235, 0.05)';
+
+      particles.forEach((p, i) => {
+        p.x += p.vx;
+        p.y += p.vy;
+
+        if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+        if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        for (let j = i + 1; j < particles.length; j++) {
+          const p2 = particles[j];
+          const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+          if (dist < 150) {
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+          }
+        }
+      });
+      requestAnimationFrame(draw);
+    };
+
+    init();
+    draw();
+    window.addEventListener('resize', init);
+
+    return () => {
+      clearTimeout(timer);
+      clearInterval(slideTimer);
+      window.removeEventListener('resize', init);
+    };
+  }, [isDarkMode]);
+
+  if (isInitialLoad) {
+    return (
+      <div className="pt-32 px-8 max-w-7xl mx-auto space-y-24">
+        <div className="flex flex-col items-center space-y-8 text-center">
+          <Skeleton className="h-10 w-64 rounded-full" />
+          <Skeleton className="h-24 w-full max-w-3xl" />
+          <Skeleton className="h-12 w-2/3 max-w-xl" />
+          <div className="flex space-x-4">
+            <Skeleton className="h-16 w-48" />
+            <Skeleton className="h-16 w-48" />
+          </div>
+        </div>
+        <Skeleton className="h-[500px] w-full rounded-[4rem]" />
+      </div>
+    );
+  }
 
   return (
-    <div className="relative selection:bg-blue-500/30">
-      {/* 1. Hero Section */}
-      <section className="min-h-screen flex flex-col items-center justify-center pt-32 pb-20 px-4 text-center overflow-hidden relative">
-        <div className="max-w-5xl mx-auto z-10 animate-in fade-in slide-in-from-bottom-10 duration-1000">
-          <div className="inline-flex items-center space-x-2 px-6 py-2 rounded-full bg-blue-600/10 border border-blue-500/30 text-sm font-semibold text-blue-400 mb-10 shadow-[0_0_20px_rgba(37,99,235,0.1)] hover:scale-105 transition-transform cursor-default">
+    <div className={`relative selection:bg-blue-500/30 transition-colors duration-500 ${isDarkMode ? 'text-slate-200' : 'text-slate-800'}`}>
+      
+      {/* 1. Hero Section with Slider */}
+      <section className="min-h-screen flex flex-col items-center justify-center pt-20 px-4 text-center overflow-hidden relative">
+        <div className="max-w-6xl mx-auto z-10 animate-in fade-in slide-in-from-bottom-10 duration-1000">
+          <div className="inline-flex items-center space-x-2 px-6 py-2 rounded-full bg-blue-600/10 border border-blue-500/30 text-sm font-semibold text-blue-400 mb-10 shadow-[0_0_20px_rgba(37,99,235,0.1)] hover:scale-105 transition-transform cursor-pointer">
             <Sparkles className="w-4 h-4" />
-            <span className="tracking-tight uppercase text-xs">Precision Engineering for Modern Ateliers</span>
+            <span className="tracking-tight uppercase text-xs">{heroSlides[currentSlide].subtitle}</span>
           </div>
-          <h1 className="text-6xl md:text-8xl font-black leading-[1.05] mb-10 bg-gradient-to-b from-white via-white to-white/50 bg-clip-text text-transparent tracking-tighter">
-            Get Perfect Client Measurements From Just a Photo.
+          <h1 className="text-6xl md:text-[8rem] font-black leading-[0.9] mb-12 bg-gradient-to-b from-blue-500 via-blue-600 to-blue-900 bg-clip-text text-transparent dark:from-white dark:via-white dark:to-white/40 tracking-tighter uppercase">
+            {heroSlides[currentSlide].title.split(' ').map((word, i) => <React.Fragment key={i}>{word} <br className="hidden md:block" /></React.Fragment>)}
           </h1>
-          <p className="text-xl md:text-2xl text-slate-400 mb-14 max-w-3xl mx-auto font-medium leading-relaxed">
-            TailorAI uses artificial intelligence to generate accurate body measurements from full-body photos — saving tailors time, reducing errors, and improving fit.
+          <p className={`text-xl md:text-3xl mb-16 max-w-4xl mx-auto font-medium leading-relaxed ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+            Generate 50+ accurate anatomical measurements from a single photometry scan. No tape. No errors. Just perfect results.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
             <button 
               onClick={onGetStarted}
-              className="px-12 py-5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-black text-lg transition-all transform hover:scale-105 shadow-[0_15px_40px_-10px_rgba(37,99,235,0.5)] active:scale-95"
+              className="px-16 py-6 rounded-3xl bg-blue-600 hover:bg-blue-500 text-white font-black text-xl transition-all transform hover:scale-105 shadow-[0_20px_50px_-10px_rgba(37,99,235,0.6)] active:scale-95 flex items-center"
             >
-              Get Started Free
+              Get Started Free <ChevronRight className="w-6 h-6 ml-2" />
             </button>
-            <button className="px-12 py-5 rounded-2xl bg-slate-900/60 hover:bg-slate-800 border border-slate-700/50 text-white font-bold text-lg transition-all flex items-center space-x-3 backdrop-blur-xl group">
-              <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-blue-600 transition-colors">
-                <Play className="w-4 h-4 text-white fill-current ml-0.5" />
+            <button className={`px-16 py-6 rounded-3xl border border-slate-700/50 font-bold text-xl transition-all flex items-center space-x-3 backdrop-blur-xl group shadow-2xl ${isDarkMode ? 'bg-slate-900/60 text-white hover:bg-slate-800' : 'bg-white text-slate-900 hover:bg-slate-50'}`}>
+              <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Play className="w-5 h-5 text-white fill-current ml-1" />
               </div>
-              <span>See How It Works</span>
+              <span>Experience Demo</span>
             </button>
           </div>
         </div>
         
-        <div className="mt-28 relative w-full max-w-6xl mx-auto px-4 perspective-1000 animate-in fade-in zoom-in-95 duration-1000 delay-300">
-          <div className="relative rounded-[3rem] overflow-hidden border border-white/10 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.8)] group">
-            <img 
-              src="https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&q=80&w=2000" 
-              alt="TailorAI 3D Scanning Interface" 
-              className="w-full h-auto opacity-90 transition-transform duration-1000 group-hover:scale-105"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-60"></div>
+        <div className="mt-32 relative w-full max-w-7xl mx-auto px-4 perspective-1000 animate-in fade-in zoom-in-95 duration-1000 delay-300">
+          <div className="relative rounded-[4rem] overflow-hidden border border-white/10 shadow-[0_60px_150px_-30px_rgba(0,0,0,0.6)] bg-slate-950 aspect-video md:aspect-[21/9]">
+            {heroSlides.map((slide, idx) => (
+              <img 
+                key={idx}
+                src={slide.img} 
+                alt="High Definition Tailoring" 
+                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${currentSlide === idx ? 'opacity-70 scale-100' : 'opacity-0 scale-110'}`}
+              />
+            ))}
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent"></div>
+            <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex space-x-4">
+               {heroSlides.map((_, i) => (
+                 <button 
+                   key={i} 
+                   onClick={() => setCurrentSlide(i)}
+                   className={`h-2 transition-all duration-300 rounded-full ${currentSlide === i ? 'w-20 bg-blue-600' : 'w-12 bg-white/20 hover:bg-white/40'}`} 
+                 />
+               ))}
+            </div>
+            
+            <button 
+              onClick={() => setCurrentSlide(prev => (prev - 1 + heroSlides.length) % heroSlides.length)}
+              className="absolute left-8 top-1/2 -translate-y-1/2 p-4 rounded-full bg-white/10 backdrop-blur-md text-white hover:bg-white/20 transition-all opacity-0 group-hover:opacity-100 hidden md:block"
+            >
+              <ChevronLeft className="w-8 h-8" />
+            </button>
+            <button 
+              onClick={() => setCurrentSlide(prev => (prev + 1) % heroSlides.length)}
+              className="absolute right-8 top-1/2 -translate-y-1/2 p-4 rounded-full bg-white/10 backdrop-blur-md text-white hover:bg-white/20 transition-all opacity-0 group-hover:opacity-100 hidden md:block"
+            >
+              <ChevronRight className="w-8 h-8" />
+            </button>
           </div>
         </div>
       </section>
 
       {/* 2. Problem Section */}
-      <section className="py-40 px-4 bg-slate-950/40 relative">
-        <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-24 items-center">
-          <div className="relative">
-            <div className="relative rounded-[2.5rem] overflow-hidden border border-white/5 shadow-2xl">
-              <img src="https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&q=80&w=1200" alt="Manual Measuring Frustrations" className="w-full h-auto grayscale opacity-50 contrast-125" />
-              <div className="absolute inset-0 bg-gradient-to-tr from-slate-950/80 via-transparent to-blue-600/10"></div>
+      <section className="py-60 px-4">
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-32 items-center">
+          <div className="relative rounded-[3.5rem] overflow-hidden border border-white/5 shadow-2xl aspect-[4/5] lg:aspect-auto bg-slate-950">
+            <img src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&q=80&w=1200" alt="The Struggle of Manual Measurement" className="w-full h-full object-cover grayscale opacity-40 hover:grayscale-0 transition-all duration-1000" />
+            <div className="absolute inset-0 bg-gradient-to-tr from-slate-950/90 via-transparent to-red-600/20"></div>
+            <div className="absolute bottom-12 left-12">
+               <div className="px-6 py-2 bg-red-600/20 border border-red-500/50 rounded-xl text-red-400 font-black text-xs uppercase mb-4 tracking-widest">Inefficient Method</div>
+               <h3 className="text-4xl font-black text-white">45-Minute Sessions. <br /> Human Errors. <br /> Costly Re-works.</h3>
             </div>
           </div>
-          <div>
-            <h2 className="text-4xl md:text-6xl font-black mb-12 leading-[1.1] tracking-tighter">Measuring Clients Is Slow, Stressful, and Error-Prone.</h2>
-            <div className="space-y-10">
+          <div className="space-y-16">
+            <h2 className="text-5xl md:text-8xl font-black mb-12 tracking-tighter uppercase leading-none">Traditional <br /> Methods are <br /> <span className="text-red-600">Obsolete.</span></h2>
+            <div className="space-y-12">
               {[
-                { text: "Manual measurements take too long", icon: Clock },
-                { text: "Clients move or get tired", icon: Users },
-                { text: "Inconsistent results between tailors", icon: Repeat },
-                { text: "Re-sewing costs time and money", icon: Scissors }
+                { text: "Tape measurements vary by 2-5cm per session", icon: AlertCircle, color: "text-red-400" },
+                { text: "High client drop-off due to length of fitting", icon: Users, color: "text-orange-400" },
+                { text: "Manual data entry is prone to transcription error", icon: Database, color: "text-yellow-400" },
+                { text: "Logistical nightmare for global bespoke orders", icon: Globe, color: "text-blue-400" }
               ].map((item, idx) => (
-                <div key={idx} className="flex items-center space-x-6 group">
-                  <div className="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400 group-hover:bg-red-500 transition-all group-hover:text-white">
-                    <item.icon className="w-7 h-7" />
+                <div key={idx} className="flex items-center space-x-8 group">
+                  <div className={`w-16 h-16 rounded-[2rem] bg-slate-900 border border-white/5 flex items-center justify-center ${item.color} shadow-2xl group-hover:scale-110 transition-transform`}>
+                    <item.icon className="w-8 h-8" />
                   </div>
-                  <h3 className="text-2xl font-bold text-slate-200">{item.text}</h3>
+                  <h3 className={`text-2xl font-bold leading-tight ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>{item.text}</h3>
                 </div>
               ))}
             </div>
@@ -89,355 +231,124 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
       </section>
 
       {/* 3. Solution Section */}
-      <section className="py-40 px-4 relative">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-24">
-            <h2 className="text-5xl md:text-7xl font-black mb-8 tracking-tighter">One Photo. Accurate Measurements. Better Fits.</h2>
-            <p className="text-xl text-slate-400 max-w-3xl mx-auto">
-              TailorAI analyzes a client’s full-body photo using advanced AI to generate a complete, editable measurement chart in seconds.
-            </p>
+      <section className={`py-60 px-4 border-y border-white/5 ${isDarkMode ? 'bg-slate-900/20' : 'bg-blue-50/30'}`}>
+        <div className="max-w-7xl mx-auto text-center">
+          <div className="inline-flex items-center space-x-2 px-6 py-2 rounded-full bg-blue-600/10 border border-blue-500/30 text-sm font-semibold text-blue-400 mb-12">
+            <Cpu className="w-4 h-4" />
+            <span className="tracking-tight uppercase text-xs">Spatial Neural Architecture</span>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {[
-              { title: "No tape measure required", icon: Ruler },
-              { title: "Consistent, repeatable accuracy", icon: CheckCircle2 },
-              { title: "Works for men and women", icon: Users },
-              { title: "Designed for professional tailors", icon: Award },
-            ].map((item, idx) => (
-              <div key={idx} className="p-10 rounded-[2.5rem] bg-slate-900/40 border border-white/5 hover:border-blue-500/30 transition-all text-center group">
-                <div className="w-16 h-16 rounded-2xl bg-blue-600/10 flex items-center justify-center text-blue-400 mx-auto mb-8 group-hover:scale-110 transition-transform">
-                  <item.icon className="w-8 h-8" />
-                </div>
-                <h3 className="text-xl font-bold text-white">{item.title}</h3>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 4. How It Works Section */}
-      <section className="py-40 px-4 bg-blue-600/5">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-5xl md:text-7xl font-black text-center mb-24 tracking-tighter">How TailorAI Works</h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12">
-            {[
-              { step: "01", title: "Upload Photo", desc: "Upload a client’s full-body photo from any smartphone or camera.", icon: Upload },
-              { step: "02", title: "AI Analysis", desc: "TailorAI analyzes body proportions using proprietary algorithms.", icon: Cpu },
-              { step: "03", title: "Get Report", desc: "Get a complete measurement report including chest, waist, hips, and more.", icon: FileText },
-              { step: "04", title: "Save & Edit", desc: "Save, edit, or download instantly to start your pattern drafting.", icon: FileDown },
-            ].map((item, idx) => (
-              <div key={idx} className="relative group">
-                <div className="text-8xl font-black text-blue-500/10 absolute -top-10 -left-6 group-hover:text-blue-500/20 transition-colors">{item.step}</div>
-                <div className="relative z-10">
-                  <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white mb-6">
-                    <item.icon className="w-6 h-6" />
+          <h2 className="text-6xl md:text-9xl font-black mb-12 tracking-tighter uppercase leading-none">THE NEURAL <br /> SOLUTION.</h2>
+          <p className={`text-2xl max-w-4xl mx-auto mb-24 font-medium leading-relaxed ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+            Our proprietary Photometry-to-Mesh algorithm reconstructs a high-fidelity 3D human model from a standard photo, extracting every metric instantly.
+          </p>
+          <div className="grid md:grid-cols-3 gap-12">
+             {[
+               { title: "One-Click Scan", desc: "No sensors needed. Just any smartphone camera.", icon: Camera, img: "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&q=80&w=800" },
+               { title: "99.8% Precision", desc: "Sub-millimeter accuracy for surgical precision.", icon: Target, img: "https://images.unsplash.com/photo-1594932224828-b4b059b6f6f9?auto=format&fit=crop&q=80&w=800" },
+               { title: "Instant Pattern", desc: "Directly export to CAD or manual block tools.", icon: Ruler, img: "https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&q=80&w=800" }
+             ].map((sol, i) => (
+               <div key={i} className={`p-2 rounded-[3.5rem] border border-white/5 hover:border-blue-500/30 transition-all group overflow-hidden ${isDarkMode ? 'bg-slate-950' : 'bg-white shadow-xl'}`}>
+                  <div className="aspect-[4/3] rounded-[3rem] overflow-hidden mb-10 relative">
+                    <img src={sol.img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 opacity-60" />
+                    <div className="absolute inset-0 bg-blue-600/10 group-hover:bg-transparent transition-colors"></div>
                   </div>
-                  <h3 className="text-2xl font-bold mb-4">{item.title}</h3>
-                  <p className="text-slate-400 leading-relaxed">{item.desc}</p>
-                </div>
-              </div>
-            ))}
+                  <div className="px-10 pb-12">
+                    <div className="w-20 h-20 bg-blue-600/10 rounded-3xl flex items-center justify-center text-blue-400 mx-auto mb-8 group-hover:bg-blue-600 group-hover:text-white transition-all"><sol.icon className="w-10 h-10" /></div>
+                    <h4 className="text-3xl font-black mb-4 uppercase tracking-tighter">{sol.title}</h4>
+                    <p className={`font-medium text-lg leading-relaxed ${isDarkMode ? 'text-slate-500' : 'text-slate-500'}`}>{sol.desc}</p>
+                  </div>
+               </div>
+             ))}
           </div>
         </div>
       </section>
 
-      {/* 5. Features Section */}
-      <section className="py-40 px-4">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-5xl md:text-7xl font-black text-center mb-24 tracking-tighter">Everything You Need to Measure Smarter</h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              { title: "AI Body Measurement Extraction", icon: Ruler, desc: "Ultra-fast extraction of 50+ points." },
-              { title: "Client Profile Management", icon: Users, desc: "Keep track of measurement history and orders." },
-              { title: "3D Body Preview", icon: Box, desc: "Visualize the client's anatomy in a high-fidelity 3D space." },
-              { title: "Fabric Quantity Estimator", icon: Hammer, desc: "Calculate exactly how much material you need." },
-              { title: "AI Style Suggestions", icon: Lightbulb, desc: "Recommend styles that suit the client's silhouette." },
-              { title: "PDF Measurement Downloads", icon: FileDown, desc: "Professional reports ready for the workshop floor." },
-            ].map((item, idx) => (
-              <div key={idx} className="p-10 rounded-[3rem] bg-slate-900/60 border border-white/10 hover:border-blue-500/30 transition-all group">
-                <item.icon className="w-12 h-12 text-blue-500 mb-8 group-hover:scale-110 transition-transform" />
-                <h3 className="text-2xl font-bold text-white mb-4">{item.title}</h3>
-                <p className="text-slate-400 font-medium">{item.desc}</p>
+      {/* FOOTER SECTION */}
+      <footer className={`py-40 px-12 border-t border-white/5 relative overflow-hidden transition-colors duration-500 ${isDarkMode ? 'bg-slate-950/80 backdrop-blur-3xl' : 'bg-slate-50'}`}>
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-20">
+          <div className="space-y-8">
+            <div className="flex items-center space-x-3">
+              <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-2xl">
+                 <Scissors className="w-7 h-7 text-white" />
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 6. Who It's For Section */}
-      <section className="py-40 px-4 bg-slate-900/30">
-        <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-24 items-center">
-          <div>
-            <h2 className="text-5xl md:text-7xl font-black mb-12 tracking-tighter">Built for Modern Tailors</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {[
-                "Fashion designers", "Bespoke tailors", "Alteration shops", 
-                "Sewing studios", "Clothing brands", "Costume designers"
-              ].map((item, idx) => (
-                <div key={idx} className="flex items-center space-x-4 p-4 rounded-2xl bg-white/5 border border-white/5">
-                  <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                  <span className="font-bold text-slate-200">{item}</span>
-                </div>
+              <h3 className="text-4xl font-black tracking-tighter bg-gradient-to-r from-blue-500 to-emerald-400 bg-clip-text text-transparent">TailorAI</h3>
+            </div>
+            <p className={`text-lg font-medium leading-relaxed ${isDarkMode ? 'text-slate-500' : 'text-slate-600'}`}>
+              Revolutionizing the bespoke fashion industry with precision neural reconstruction. The digital bridge between tradition and future.
+            </p>
+            <div className="flex items-center space-x-6">
+              {[Twitter, Github, Linkedin, Instagram].map((Icon, idx) => (
+                <button key={idx} className={`p-4 rounded-2xl transition-all hover:scale-110 ${isDarkMode ? 'bg-slate-900 text-slate-400 hover:text-white' : 'bg-white text-slate-500 hover:text-blue-600 shadow-md'}`}>
+                  <Icon className="w-6 h-6" />
+                </button>
               ))}
             </div>
           </div>
-          <div className="relative">
-            <img src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&q=80&w=1200" alt="Professional Bespoke Tailor" className="rounded-[3rem] shadow-2xl border border-white/10" />
-            <div className="absolute inset-0 bg-blue-600/10 rounded-[3rem]"></div>
-          </div>
-        </div>
-      </section>
 
-      {/* 7. Trust & Credibility Section */}
-      <section className="py-40 px-4">
-        <div className="max-w-6xl mx-auto text-center">
-          <h2 className="text-5xl md:text-7xl font-black mb-12 tracking-tighter">Designed With Accuracy, Privacy, and Security in Mind</h2>
-          <div className="grid md:grid-cols-3 gap-12 mt-20">
-            {[
-              { title: "Secure image storage", icon: Lock, desc: "End-to-end encryption for all uploaded media." },
-              { title: "Your data is never shared", icon: Shield, desc: "Strict privacy protocols that keep your business private." },
-              { title: "Built on Supabase", icon: Database, desc: "Enterprise-grade infrastructure for 99.9% uptime." },
-            ].map((item, idx) => (
-              <div key={idx} className="flex flex-col items-center">
-                <div className="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center text-emerald-400 mb-8">
-                  <item.icon className="w-10 h-10" />
-                </div>
-                <h3 className="text-2xl font-bold mb-4">{item.title}</h3>
-                <p className="text-slate-500 font-medium">{item.desc}</p>
-              </div>
-            ))}
+          <div>
+            <h4 className="text-xs font-black uppercase tracking-[0.4em] mb-12 text-blue-500">Product Protocol</h4>
+            <ul className={`space-y-6 text-lg font-bold ${isDarkMode ? 'text-slate-500' : 'text-slate-600'}`}>
+              <li className="hover:text-blue-500 transition-colors cursor-pointer flex items-center group">
+                <ChevronRight className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-all -translate-x-4 group-hover:translate-x-0" /> Neural Scanning
+              </li>
+              <li className="hover:text-blue-500 transition-colors cursor-pointer flex items-center group">
+                <ChevronRight className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-all -translate-x-4 group-hover:translate-x-0" /> CAD Integration
+              </li>
+              <li className="hover:text-blue-500 transition-colors cursor-pointer flex items-center group">
+                <ChevronRight className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-all -translate-x-4 group-hover:translate-x-0" /> Enterprise API
+              </li>
+              <li className="hover:text-blue-500 transition-colors cursor-pointer flex items-center group">
+                <ChevronRight className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-all -translate-x-4 group-hover:translate-x-0" /> Security Sharding
+              </li>
+            </ul>
           </div>
-        </div>
-      </section>
 
-      {/* 10. Visual Demo Section */}
-      <section className="py-40 px-4 bg-slate-950">
-        <div className="max-w-6xl mx-auto text-center">
-          <h2 className="text-5xl md:text-7xl font-black mb-6 tracking-tighter">See TailorAI in Action</h2>
-          <p className="text-2xl text-slate-400 mb-20 font-medium">From upload to measurement in seconds.</p>
-          <div className="aspect-video w-full rounded-[4rem] overflow-hidden border border-white/10 shadow-2xl relative bg-slate-900 group">
-             <img src="https://images.unsplash.com/photo-1520004434532-668416a08753?auto=format&fit=crop&q=80&w=2000" className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-[2s]" alt="Demo UI" />
-             <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-32 h-32 bg-blue-600 rounded-full flex items-center justify-center shadow-3xl cursor-pointer hover:scale-110 transition-transform">
-                   <Play className="w-12 h-12 text-white fill-current ml-2" />
-                </div>
-             </div>
+          <div>
+            <h4 className="text-xs font-black uppercase tracking-[0.4em] mb-12 text-blue-500">Company Grid</h4>
+            <ul className={`space-y-6 text-lg font-bold ${isDarkMode ? 'text-slate-500' : 'text-slate-600'}`}>
+              <li className="hover:text-blue-500 transition-colors cursor-pointer flex items-center group">
+                <ChevronRight className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-all -translate-x-4 group-hover:translate-x-0" /> Vision Statement
+              </li>
+              <li className="hover:text-blue-500 transition-colors cursor-pointer flex items-center group">
+                <ChevronRight className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-all -translate-x-4 group-hover:translate-x-0" /> Master Artisans
+              </li>
+              <li className="hover:text-blue-500 transition-colors cursor-pointer flex items-center group">
+                <ChevronRight className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-all -translate-x-4 group-hover:translate-x-0" /> Neural Lab
+              </li>
+              <li className="hover:text-blue-500 transition-colors cursor-pointer flex items-center group">
+                <ChevronRight className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-all -translate-x-4 group-hover:translate-x-0" /> Careers Node
+              </li>
+            </ul>
           </div>
-        </div>
-      </section>
 
-      {/* 11. Benefits vs Traditional Method */}
-      <section className="py-40 px-4">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-5xl md:text-7xl font-black text-center mb-24 tracking-tighter">Why TailorAI Beats Manual Measuring</h2>
-          <div className="rounded-[3rem] overflow-hidden border border-white/10 bg-slate-900/60 shadow-2xl">
-             <table className="w-full text-left">
-                <thead>
-                   <tr className="border-b border-white/10">
-                      <th className="p-10 text-xl font-bold text-slate-500">Feature</th>
-                      <th className="p-10 text-xl font-bold text-slate-500">Manual</th>
-                      <th className="p-10 text-xl font-bold text-blue-500 bg-blue-500/5">TailorAI</th>
-                   </tr>
-                </thead>
-                <tbody>
-                   {[
-                      { f: "Processing Time", m: "30-45 Minutes", t: "Instant (Seconds)" },
-                      { f: "Error Probability", m: "High (Human Error)", t: "AI-Assisted (Ultra Low)" },
-                      { f: "Consistency", m: "Varies by Tailor", t: "100% Consistent" },
-                      { f: "Client Stress", m: "High (Long Standing)", t: "Low (One Photo)" }
-                   ].map((row, i) => (
-                      <tr key={i} className="border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors">
-                         <td className="p-10 font-bold text-slate-300">{row.f}</td>
-                         <td className="p-10 text-slate-500">{row.m}</td>
-                         <td className="p-10 font-black text-white bg-blue-500/5">{row.t}</td>
-                      </tr>
-                   ))}
-                </tbody>
-             </table>
-          </div>
-        </div>
-      </section>
-
-      {/* 14. Pricing Preview Section */}
-      <section className="py-40 px-4 bg-blue-600/5">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-24">
-            <h2 className="text-5xl md:text-7xl font-black tracking-tighter mb-8">Simple Pricing That Grows With You</h2>
-            <p className="text-xl text-slate-400">Choose the plan that fits your atelier's output.</p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              { name: "Solo", price: "$49", desc: "For independent bespoke tailors." },
-              { name: "Atelier", price: "$149", desc: "For professional design studios.", popular: true },
-              { name: "Enterprise", price: "Custom", desc: "For global luxury brands." },
-            ].map((plan, i) => (
-              <div key={i} className={`p-12 rounded-[3.5rem] border transition-all ${plan.popular ? 'bg-blue-600 border-blue-400 shadow-2xl scale-105' : 'bg-slate-900 border-white/5 hover:border-white/20'}`}>
-                {plan.popular && <div className="inline-block px-4 py-1 bg-white text-blue-600 rounded-full text-[10px] font-black uppercase tracking-widest mb-6">Most Popular</div>}
-                <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
-                <div className="flex items-baseline mb-6">
-                   <span className="text-5xl font-black">{plan.price}</span>
-                   {plan.price !== "Custom" && <span className="text-lg opacity-60 ml-2">/mo</span>}
-                </div>
-                <p className={`mb-10 font-medium ${plan.popular ? 'text-blue-50' : 'text-slate-400'}`}>{plan.desc}</p>
-                <button className={`w-full py-4 rounded-2xl font-black uppercase text-xs tracking-widest transition-all ${plan.popular ? 'bg-white text-blue-600 hover:scale-105' : 'bg-blue-600 text-white hover:bg-blue-500'}`}>Select Plan</button>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 12. FAQs Section */}
-      <section className="py-40 px-4">
-        <div className="max-w-3xl mx-auto">
-          <h2 className="text-5xl md:text-7xl font-black text-center mb-24 tracking-tighter">FAQs</h2>
-          <div className="space-y-6">
-            {[
-              { q: "How accurate is TailorAI?", a: "TailorAI consistently achieves over 99% accuracy in comparative tests against master tailors, with a typical margin of error under 0.5cm." },
-              { q: "What photo is required?", a: "One front-facing full body photo and one side-profile photo in well-lit conditions with relatively fitted clothing." },
-              { q: "Can I edit measurements?", a: "Absolutely. All AI-generated data is fully editable, allowing you to apply custom tolerances and style adjustments." },
-              { q: "Is my data safe?", a: "Yes. We use military-grade encryption and never share or sell your client's imagery or biometric data." }
-            ].map((faq, i) => (
-              <div key={i} className="p-8 rounded-3xl bg-slate-900/40 border border-white/5 hover:border-blue-500/20 transition-all">
-                <h3 className="text-xl font-bold mb-4 flex items-center">
-                  <HelpCircle className="w-5 h-5 text-blue-500 mr-3" /> {faq.q}
-                </h3>
-                <p className="text-slate-500 font-medium leading-relaxed">{faq.a}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 15. Blog / Education Section */}
-      <section className="py-40 px-4 bg-slate-950">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-end mb-24 gap-8">
-             <div>
-                <h2 className="text-5xl md:text-7xl font-black tracking-tighter mb-6">Learning Tailoring Technology</h2>
-                <p className="text-xl text-slate-400">Discover how AI is transforming the bespoke fashion industry.</p>
-             </div>
-             <button className="flex items-center space-x-2 text-blue-500 font-black uppercase text-sm tracking-widest hover:text-blue-400 transition-colors">
-                <span>View All Articles</span> <ArrowRight className="w-4 h-4" />
-             </button>
-          </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              { img: "https://images.unsplash.com/photo-1520970014086-2208d157c9e2?auto=format&fit=crop&q=80&w=800", title: "The Future of Custom Clothing", date: "Oct 12, 2024" },
-              { img: "https://images.unsplash.com/photo-1598257006458-087169a1f08d?auto=format&fit=crop&q=80&w=800", title: "AI in Pattern Drafting", date: "Oct 08, 2024" },
-              { img: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&q=80&w=800", title: "Reducing Fabric Waste", date: "Sep 28, 2024" }
-            ].map((blog, i) => (
-              <div key={i} className="group cursor-pointer">
-                <div className="aspect-[4/3] rounded-[2.5rem] overflow-hidden mb-8 border border-white/5">
-                   <img src={blog.img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={blog.title} />
-                </div>
-                <p className="text-blue-500 font-black uppercase text-[10px] tracking-widest mb-4">{blog.date}</p>
-                <h3 className="text-2xl font-black group-hover:text-blue-400 transition-colors mb-2">{blog.title}</h3>
-                <p className="text-slate-500 font-medium">Read more about this technological breakthrough...</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 13. Testimonials (Enhanced Stage) */}
-      <section className="py-40 px-4">
-        <div className="max-w-6xl mx-auto bg-blue-600 rounded-[4rem] p-12 md:p-24 text-center relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-12 opacity-10"><Scissors className="w-64 h-64 rotate-12" /></div>
-          <div className="relative z-10">
-            <div className="flex justify-center space-x-1 mb-10 text-white">
-              {[...Array(5)].map((_, i) => <Star key={i} className="w-6 h-6 fill-current" />)}
-            </div>
-            <p className="text-3xl md:text-5xl font-black text-white leading-tight mb-12 tracking-tighter">
-              “TailorAI reduced my measurement time by 70%. It's the biggest technological jump my shop has ever made.”
+          <div className="space-y-12">
+            <h4 className="text-xs font-black uppercase tracking-[0.4em] text-blue-500">Initialize Updates</h4>
+            <p className={`text-lg font-medium leading-relaxed ${isDarkMode ? 'text-slate-500' : 'text-slate-600'}`}>
+              Receive the latest neural updates and atelier insights.
             </p>
-            <div>
-              <p className="text-xl font-black text-white">Alessandro Rossi</p>
-              <p className="text-blue-200 font-bold uppercase tracking-widest text-xs mt-1">Creative Director, Rossi Bespoke</p>
+            <div className="relative group">
+              <input 
+                type="email" 
+                placeholder="tailor@atelier.com" 
+                className={`w-full p-6 rounded-2xl outline-none border transition-all ${isDarkMode ? 'bg-slate-900 border-white/5 focus:border-blue-500' : 'bg-white border-slate-200 focus:border-blue-500 shadow-sm'}`} 
+              />
+              <button className="absolute right-2 top-2 p-4 bg-blue-600 rounded-xl text-white hover:bg-blue-500 transition-all active:scale-95">
+                <Mail className="w-6 h-6" />
+              </button>
             </div>
           </div>
         </div>
-      </section>
 
-      {/* 8. Primary Call-to-Action Section */}
-      <section className="py-60 px-4 text-center">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-5xl md:text-8xl font-black mb-12 tracking-tighter">Start Measuring Smarter Today</h2>
-          <button 
-            onClick={onGetStarted}
-            className="px-16 py-7 rounded-3xl bg-blue-600 hover:bg-blue-500 text-white font-black text-2xl transition-all shadow-[0_20px_60px_-15px_rgba(37,99,235,0.6)] hover:scale-105 active:scale-95"
-          >
-            Create Free Account
-          </button>
-          <p className="mt-8 text-slate-500 font-bold uppercase text-sm tracking-widest flex items-center justify-center">
-            <Check className="w-4 h-4 mr-2" /> No credit card required.
-          </p>
-        </div>
-      </section>
-
-      {/* 9. Footer */}
-      <footer className="py-32 px-8 border-t border-white/5 bg-slate-950">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-4 gap-20 mb-24">
-            <div className="col-span-1 md:col-span-2">
-              <div className="flex items-center space-x-4 mb-8">
-                 <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-xl">
-                    <Scissors className="w-6 h-6 text-white" />
-                 </div>
-                 <h2 className="text-3xl font-black tracking-tighter">TailorAI</h2>
-              </div>
-              <p className="text-slate-500 text-lg max-w-sm mb-10 font-medium leading-relaxed">The future of bespoke tailoring is digital. Join thousands of master tailors already using our AI core.</p>
-              <div className="flex space-x-6">
-                <Mail className="w-6 h-6 text-slate-700 hover:text-blue-500 cursor-pointer transition-colors" />
-                <Globe className="w-6 h-6 text-slate-700 hover:text-blue-500 cursor-pointer transition-colors" />
-                <Smartphone className="w-6 h-6 text-slate-700 hover:text-blue-500 cursor-pointer transition-colors" />
-              </div>
-            </div>
-            <div>
-              <h3 className="text-white font-black mb-10 uppercase text-xs tracking-widest">Platform</h3>
-              <ul className="space-y-6 text-slate-500 font-bold">
-                <li className="hover:text-blue-500 cursor-pointer transition-colors">AI Measurements</li>
-                <li className="hover:text-blue-500 cursor-pointer transition-colors">3D Visualization</li>
-                <li onClick={() => setIsFeatureModalOpen(true)} className="hover:text-blue-500 cursor-pointer transition-colors text-blue-400">Request Feature</li>
-                <li className="hover:text-blue-500 cursor-pointer transition-colors">Partner Program</li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-white font-black mb-10 uppercase text-xs tracking-widest">Resources</h3>
-              <ul className="space-y-6 text-slate-500 font-bold">
-                <li className="hover:text-blue-500 cursor-pointer transition-colors">Documentation</li>
-                <li className="hover:text-blue-500 cursor-pointer transition-colors">API Docs</li>
-                <li className="hover:text-blue-500 cursor-pointer transition-colors">Privacy Policy</li>
-                <li className="hover:text-blue-500 cursor-pointer transition-colors">Terms of Service</li>
-              </ul>
-            </div>
-          </div>
-          <div className="pt-16 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8 text-slate-700 text-[10px] font-black uppercase tracking-widest">
-            <p>© 2024 TailorAI Inc. Built on Supabase infrastructure.</p>
-            <div className="flex items-center space-x-8">
-               <span>ENCRYPTED PORTAL</span>
-               <span>GDPR COMPLIANT</span>
-            </div>
+        <div className="max-w-7xl mx-auto mt-40 pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center space-y-8 md:space-y-0 text-center md:text-left">
+          <p className="text-slate-600 text-[10px] font-black uppercase tracking-[0.4em]">© 2024 TailorAI Inc. Neural Reconstruction Protocol Active.</p>
+          <div className="flex flex-wrap justify-center gap-12 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">
+            <span className="hover:text-white cursor-pointer transition-colors">Documentation</span>
+            <span className="hover:text-white cursor-pointer transition-colors">Privacy Shield</span>
+            <span className="hover:text-white cursor-pointer transition-colors">Security Audit</span>
+            <span className="hover:text-white cursor-pointer transition-colors">Status: Nominal</span>
           </div>
         </div>
       </footer>
-
-      {/* Feature Request Modal */}
-      {isFeatureModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-300">
-          <div className="bg-slate-900 border border-white/10 rounded-[3rem] p-12 max-w-xl w-full shadow-3xl">
-            <div className="flex justify-between items-center mb-8">
-              <h2 className="text-3xl font-black text-white uppercase tracking-tighter">Feature Request</h2>
-              <button onClick={() => setIsFeatureModalOpen(false)}><X className="w-8 h-8 text-slate-500 hover:text-white" /></button>
-            </div>
-            <p className="text-slate-400 mb-10">Describe the technological advancement you want to see in TailorAI.</p>
-            <div className="space-y-6">
-              <input type="text" placeholder="Title of suggestion" className="w-full bg-slate-800 border border-white/5 p-5 rounded-2xl text-white font-bold outline-none focus:ring-2 focus:ring-blue-500" />
-              <textarea placeholder="Tell us how this would transform your atelier's workflow..." className="w-full bg-slate-800 border border-white/5 p-5 rounded-2xl text-white font-medium h-40 outline-none focus:ring-2 focus:ring-blue-500" />
-              <button onClick={() => setIsFeatureModalOpen(false)} className="w-full py-5 bg-blue-600 text-white font-black rounded-2xl uppercase tracking-widest shadow-xl shadow-blue-500/20 active:scale-95 transition-all">Submit Neural Proposal</button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

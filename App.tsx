@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import LandingPage from './pages/LandingPage';
 import Dashboard from './pages/Dashboard';
 import Snowfall from './components/Snowfall';
@@ -119,6 +120,7 @@ const App: React.FC = () => {
           )}
         </div>
       )}
+      <Analytics />
     </div>
   );
 };
